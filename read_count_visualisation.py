@@ -4,11 +4,8 @@
 
 import pandas as pd
 import seaborn as sns
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import os
-import argparse
 import glob
+import sys
 
 def read_count_visualisation(sample_sheet, list_of_demultiplex_stats):
 	dfs = {}
@@ -37,7 +34,7 @@ def read_count_visualisation(sample_sheet, list_of_demultiplex_stats):
 	for worksheet in worksheet_ids:
 		sub_df = group_by_worksheet_df.get_group(worksheet).sort_values(by=['sample_id'])
 		g = sns.FacetGrid(sub_df, col="worksheet_id", col_wrap=1, height=10, aspect=1.5)
-		g.map_dataframe(sns.barplot, x="sample_id", y="total")
+		g.map_dataframe(sns.barplot, x="sample_id", y="total")  
 		g.set(ylim=(0, 200000000))
 		g.set_axis_labels("Sample ID", "Total Reads")
 		g.set_xticklabels(rotation=45) 
@@ -47,4 +44,8 @@ if __name__ == '__main__':
 
 	demultiplex_stats = glob.glob('Demultiplex_Output/Logs_Intermediates/FastqGeneration/Reports/Lane*/Demultiplex_Stats.csv')
 	sample_sheet = 'Demultiplex_Output/Logs_Intermediates/FastqGeneration/SampleSheet_combined.csv'
-	read_count_visualisation(sample_sheet, demultiplex_stats)
+	try:
+		read_count_visualisation(sample_sheet, demultiplex_stats)
+	except IndexError:
+		print("ERROR! The Illumina app has not demultiplexed the data. You will need to demultiplex with alternate software")
+		sys.exit(1)
